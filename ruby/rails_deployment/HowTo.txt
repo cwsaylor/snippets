@@ -1,0 +1,110 @@
+# Capfile
+load 'deploy/assets'
+
+# Gemfile
+gem 'unicorn'
+gem 'capistrano'
+
+##################### Remote Terminal #####################
+apt-get -y update
+
+echo "DOMAIN" > /etc/hostname
+hostname -F /etc/hostname
+
+dpkg-reconfigure tzdata
+[Set Other, then UTC]
+
+vi /etc/ssh/sshd_config
+---------------------------------
+Port 2223
+PermitRootLogin no
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+---------------------------------
+
+apt-get -y install ufw
+ufw default deny
+ufw allow 2223/tcp
+# The following two rules allow access from other local servers
+ufw allow from 192.168.140.138
+ufw allow from 192.168.140.142
+ufw enable
+
+apt-get -y install curl git-core python-software-properties
+
+apt-get install screen
+
+# nginx
+add-apt-repository ppa:nginx/stable
+apt-get -y update
+apt-get -y install nginx
+service nginx start
+
+# PostgreSQL
+add-apt-repository ppa:pitti/postgresql
+apt-get -y update
+apt-get -y install postgresql libpq-dev
+sudo -u postgres psql
+# \password
+# create user APP with password 'secret';
+# create database APP_production owner APP;
+# \q
+
+# Postfix
+apt-get -y install telnet postfix
+
+# Node.js
+add-apt-repository ppa:chris-lea/node.js
+apt-get -y update
+apt-get -y install nodejs
+
+# Add deployer user
+adduser deployer --ingroup admin
+su deployer
+cd
+
+# rbenv
+curl -L https://raw.github.com/fesplugas/rbenv-installer/master/bin/rbenv-installer | bash
+vim .bashrc # add rbenv to the top
+. .bashrc
+rbenv bootstrap-ubuntu-10-04
+rbenv install 1.9.3-p125
+rbenv global 1.9.3-p125
+gem install bundler --no-ri --no-rdoc
+rbenv rehash
+
+# get to know github.com
+ssh git@github.com
+
+# after deploy:cold
+sudo rm /etc/nginx/sites-enabled/default
+sudo service nginx restart
+sudo update-rc.d -f unicorn_APP defaults
+
+
+##################### Local Terminal #####################
+
+# setup Git
+echo "config/database.yml" >> .gitignore
+cp config/database.yml config/database.example.yml
+git init
+git add .
+git commit -m "initial commit"
+git remote add origin git@github.com:ryanb/APP.git
+git push
+
+# add Capistrano, Unicorn, and nginx config
+bundle
+capify .
+chmod +x config/unicorn_init.sh
+git add .
+git commit -m "deployment configs"
+
+# ssh setup
+cat ~/.ssh/id_rsa.pub | ssh deployer@IP 'cat >> ~/.ssh/authorized_keys'
+ssh-add # -K on Mac OS X
+
+# deployment
+cap deploy:setup
+# edit /home/deployer/apps/APP/shared/config/database.yml on server
+cap deploy:cold
