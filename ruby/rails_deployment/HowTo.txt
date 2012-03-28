@@ -25,6 +25,8 @@ ChallengeResponseAuthentication no
 apt-get -y install ufw
 ufw default deny
 ufw allow 2223/tcp
+ufw allow 80/tcp
+ufw allow 443/tcp
 # The following two rules allow access from other local servers
 ufw allow from 192.168.140.138
 ufw allow from 192.168.140.142
