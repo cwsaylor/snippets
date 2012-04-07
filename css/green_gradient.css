@@ -1,0 +1,8 @@
+background-color: #0c2c33;
+background-image: -webkit-gradient(linear, left top, left bottom, from(rgb(12, 44, 51)), to(rgb(33, 82, 84)));
+background-image: -webkit-linear-gradient(top, rgb(12, 44, 51), rgb(33, 82, 84));
+background-image: -moz-linear-gradient(top, rgb(12, 44, 51), rgb(33, 82, 84));
+background-image: -o-linear-gradient(top, rgb(12, 44, 51), rgb(33, 82, 84));
+background-image: -ms-linear-gradient(top, rgb(12, 44, 51), rgb(33, 82, 84));
+background-image: linear-gradient(top, rgb(12, 44, 51), rgb(33, 82, 84));
+filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,StartColorStr='#0c2c33', EndColorStr='#215254');
